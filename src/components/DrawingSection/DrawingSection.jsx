@@ -1,21 +1,18 @@
-import { useSketchWorkspace } from '../../hooks/useSketchWorkspace';
 import CanvasControls from '../CanvasControls';
 import DrawingCanvas from '../DrawingCanvas';
 import SketchPreview from '../SketchPreview';
 
-function DrawingSection() {
-  const {
-    canvasRef,
-    handlers,
-    width,
-    height,
-    clearCanvas,
-    undoLastStroke,
-    canUndo,
-    exportSketch,
-    exportedSketch,
-  } = useSketchWorkspace();
-
+function DrawingSection({
+  canvasRef,
+  handlers,
+  width,
+  height,
+  clearCanvas,
+  undoLastStroke,
+  canUndo,
+  exportSketch,
+  exportedSketch,
+}) {
   return (
     <section aria-label="Drawing area">
       <h2 className="mb-3 text-lg font-semibold">Draw your creature</h2>
