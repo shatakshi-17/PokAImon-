@@ -1,4 +1,4 @@
-import DrawingCanvas from '../components/DrawingCanvas';
+import DrawingSection from '../components/DrawingSection';
 import ResultsPlaceholder from '../components/ResultsPlaceholder';
 
 function Home() {
@@ -16,11 +16,7 @@ function Home() {
         </header>
 
         <div className="flex flex-col gap-8">
-          <section aria-label="Drawing area">
-            <h2 className="mb-3 text-lg font-semibold">Draw your creature</h2>
-            <DrawingCanvas className="max-w-full cursor-crosshair rounded-lg border border-slate-700" />
-          </section>
-
+          <DrawingSection />
           <ResultsPlaceholder />
         </div>
       </div>

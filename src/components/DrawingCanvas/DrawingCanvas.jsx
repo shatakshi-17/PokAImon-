@@ -1,27 +1,15 @@
-import { useDrawingCanvas } from '../../hooks/useDrawingCanvas';
-
 function DrawingCanvas({
+  canvasRef,
+  handlers,
   width,
   height,
-  strokeColor,
-  strokeWidth,
-  backgroundColor,
   className = '',
 }) {
-  const { canvasRef, handlers, width: canvasWidth, height: canvasHeight } =
-    useDrawingCanvas({
-      width,
-      height,
-      strokeColor,
-      strokeWidth,
-      backgroundColor,
-    });
-
   return (
     <canvas
       ref={canvasRef}
-      width={canvasWidth}
-      height={canvasHeight}
+      width={width}
+      height={height}
       className={className}
       aria-label="Drawing canvas"
       {...handlers}

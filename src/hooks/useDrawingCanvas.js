@@ -1,5 +1,12 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CANVAS_DEFAULTS } from '../utils/canvasConstants';
+
+function applyDrawingStyles(ctx, { strokeColor, strokeWidth }) {
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = strokeWidth;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
 
 export function useDrawingCanvas(options = {}) {
   const {
@@ -12,6 +19,10 @@ export function useDrawingCanvas(options = {}) {
 
   const canvasRef = useRef(null);
   const isDrawingRef = useRef(false);
+  const didStrokeRef = useRef(false);
+  const historyRef = useRef([]);
+  const historyIndexRef = useRef(-1);
+  const [canUndo, setCanUndo] = useState(false);
 
   const getContext = useCallback(() => {
     const canvas = canvasRef.current;
@@ -38,20 +49,71 @@ export function useDrawingCanvas(options = {}) {
     };
   }, []);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
+  const updateUndoState = useCallback(() => {
+    setCanUndo(historyIndexRef.current > 0);
+  }, []);
+
+  const captureSnapshot = useCallback(() => {
+    const ctx = getContext();
+    if (!ctx) {
+      return null;
+    }
+
+    return ctx.getImageData(0, 0, width, height);
+  }, [getContext, width, height]);
+
+  const pushSnapshot = useCallback(
+    (snapshot) => {
+      if (!snapshot) {
+        return;
+      }
+
+      historyRef.current = historyRef.current.slice(
+        0,
+        historyIndexRef.current + 1,
+      );
+      historyRef.current.push(snapshot);
+      historyIndexRef.current = historyRef.current.length - 1;
+      updateUndoState();
+    },
+    [updateUndoState],
+  );
+
+  const restoreSnapshot = useCallback(
+    (snapshot) => {
+      const ctx = getContext();
+      if (!ctx || !snapshot) {
+        return;
+      }
+
+      ctx.putImageData(snapshot, 0, 0);
+      applyDrawingStyles(ctx, { strokeColor, strokeWidth });
+    },
+    [getContext, strokeColor, strokeWidth],
+  );
+
+  const fillBackground = useCallback(() => {
+    const ctx = getContext();
+    if (!ctx) {
       return;
     }
 
-    const ctx = canvas.getContext('2d');
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, width, height);
-    ctx.strokeStyle = strokeColor;
-    ctx.lineWidth = strokeWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-  }, [width, height, strokeColor, strokeWidth, backgroundColor]);
+    applyDrawingStyles(ctx, { strokeColor, strokeWidth });
+  }, [getContext, width, height, backgroundColor, strokeColor, strokeWidth]);
+
+  const resetHistory = useCallback(() => {
+    fillBackground();
+    const snapshot = captureSnapshot();
+    historyRef.current = snapshot ? [snapshot] : [];
+    historyIndexRef.current = historyRef.current.length - 1;
+    updateUndoState();
+  }, [captureSnapshot, fillBackground, updateUndoState]);
+
+  useEffect(() => {
+    resetHistory();
+  }, [resetHistory]);
 
   const startDrawing = useCallback(
     (event) => {
@@ -64,6 +126,7 @@ export function useDrawingCanvas(options = {}) {
       ctx.beginPath();
       ctx.moveTo(x, y);
       isDrawingRef.current = true;
+      didStrokeRef.current = false;
     },
     [getContext, getPoint],
   );
@@ -82,13 +145,33 @@ export function useDrawingCanvas(options = {}) {
       const { x, y } = getPoint(event);
       ctx.lineTo(x, y);
       ctx.stroke();
+      didStrokeRef.current = true;
     },
     [getContext, getPoint],
   );
 
   const stopDrawing = useCallback(() => {
+    if (isDrawingRef.current && didStrokeRef.current) {
+      pushSnapshot(captureSnapshot());
+    }
+
     isDrawingRef.current = false;
-  }, []);
+    didStrokeRef.current = false;
+  }, [captureSnapshot, pushSnapshot]);
+
+  const clearCanvas = useCallback(() => {
+    resetHistory();
+  }, [resetHistory]);
+
+  const undoLastStroke = useCallback(() => {
+    if (historyIndexRef.current <= 0) {
+      return;
+    }
+
+    historyIndexRef.current -= 1;
+    restoreSnapshot(historyRef.current[historyIndexRef.current]);
+    updateUndoState();
+  }, [restoreSnapshot, updateUndoState]);
 
   return {
     canvasRef,
@@ -100,5 +183,8 @@ export function useDrawingCanvas(options = {}) {
     },
     width,
     height,
+    clearCanvas,
+    undoLastStroke,
+    canUndo,
   };
 }

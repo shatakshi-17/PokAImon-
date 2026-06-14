@@ -4,4 +4,5 @@ export const CANVAS_DEFAULTS = {
   strokeColor: '#1e293b',
   strokeWidth: 3,
   backgroundColor: '#ffffff',
+  exportMimeType: 'image/png',
 };
