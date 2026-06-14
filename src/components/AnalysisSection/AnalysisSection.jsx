@@ -1,24 +1,27 @@
 import { ANALYSIS_STATUS } from '../../utils/analysisConstants';
+import AnalysisDebugPanel from '../AnalysisDebugPanel';
 
-function ResultsPlaceholder({
+function AnalysisSection({
   onAnalyze,
   canAnalyze = false,
   isLoading = false,
   error = null,
   status = ANALYSIS_STATUS.IDLE,
+  rawResponse = null,
 }) {
   const showIdleMessage = status === ANALYSIS_STATUS.IDLE && !error;
 
   return (
     <section
-      aria-label="AI results placeholder"
+      aria-label="Sketch analysis"
       className="rounded-lg border border-dashed border-slate-700 bg-slate-900 p-6 text-center"
     >
-      <h2 className="mb-2 text-lg font-semibold text-white">AI Results</h2>
+      <h2 className="mb-2 text-lg font-semibold text-white">Sketch Analysis</h2>
 
       {showIdleMessage && (
         <p className="text-sm text-slate-400">
-          Export a sketch, then analyze it to generate Pokemon-style flashcards.
+          Export a sketch, then analyze it with Gemini to generate creature
+          ideas.
         </p>
       )}
 
@@ -36,7 +39,7 @@ function ResultsPlaceholder({
 
       {status === ANALYSIS_STATUS.SUCCESS && !error && (
         <p className="text-sm text-green-400" role="status">
-          Analysis complete. Flashcard rendering will be added in a later phase.
+          Analysis complete. Review the raw response below.
         </p>
       )}
 
@@ -45,11 +48,14 @@ function ResultsPlaceholder({
         className="mt-4"
         onClick={onAnalyze}
         disabled={!canAnalyze || isLoading}
+        aria-busy={isLoading}
       >
-        Analyze Sketch
+        {isLoading ? 'Analyzing...' : 'Analyze Sketch'}
       </button>
+
+      <AnalysisDebugPanel rawResponse={rawResponse} />
     </section>
   );
 }
 
-export default ResultsPlaceholder;
+export default AnalysisSection;

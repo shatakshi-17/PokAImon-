@@ -1,37 +1,9 @@
-import { useCallback } from 'react';
+import AnalysisSection from '../components/AnalysisSection';
 import DrawingSection from '../components/DrawingSection';
-import ResultsPlaceholder from '../components/ResultsPlaceholder';
-import { useSketchAnalysis } from '../hooks/useSketchAnalysis';
-import { useSketchWorkspace } from '../hooks/useSketchWorkspace';
+import { usePokAImonWorkflow } from '../hooks/usePokAImonWorkflow';
 
 function Home() {
-  const {
-    canvasRef,
-    handlers,
-    width,
-    height,
-    clearCanvas,
-    undoLastStroke,
-    canUndo,
-    exportSketch,
-    exportedSketch,
-  } = useSketchWorkspace();
-  const {
-    analyzeSketch,
-    resetAnalysis,
-    isLoading,
-    error,
-    status,
-  } = useSketchAnalysis();
-
-  const handleClearCanvas = useCallback(() => {
-    clearCanvas();
-    resetAnalysis();
-  }, [clearCanvas, resetAnalysis]);
-
-  const handleAnalyzeSketch = useCallback(() => {
-    analyzeSketch(exportedSketch);
-  }, [analyzeSketch, exportedSketch]);
+  const { drawing, analysis } = usePokAImonWorkflow();
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -47,24 +19,8 @@ function Home() {
         </header>
 
         <div className="flex flex-col gap-8">
-          <DrawingSection
-            canvasRef={canvasRef}
-            handlers={handlers}
-            width={width}
-            height={height}
-            clearCanvas={handleClearCanvas}
-            undoLastStroke={undoLastStroke}
-            canUndo={canUndo}
-            exportSketch={exportSketch}
-            exportedSketch={exportedSketch}
-          />
-          <ResultsPlaceholder
-            onAnalyze={handleAnalyzeSketch}
-            canAnalyze={Boolean(exportedSketch)}
-            isLoading={isLoading}
-            error={error}
-            status={status}
-          />
+          <DrawingSection {...drawing} />
+          <AnalysisSection {...analysis} />
         </div>
       </div>
     </main>
