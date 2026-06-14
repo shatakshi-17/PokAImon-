@@ -1,5 +1,6 @@
 import { ANALYSIS_STATUS } from '../../utils/analysisConstants';
 import AnalysisDebugPanel from '../AnalysisDebugPanel';
+import CandidatesDebugPanel from '../CandidatesDebugPanel';
 
 function AnalysisSection({
   onAnalyze,
@@ -8,8 +9,10 @@ function AnalysisSection({
   error = null,
   status = ANALYSIS_STATUS.IDLE,
   rawResponse = null,
+  candidates = [],
 }) {
   const showIdleMessage = status === ANALYSIS_STATUS.IDLE && !error;
+  const hasParsedCandidates = candidates.length > 0;
 
   return (
     <section
@@ -39,7 +42,9 @@ function AnalysisSection({
 
       {status === ANALYSIS_STATUS.SUCCESS && !error && (
         <p className="text-sm text-green-400" role="status">
-          Analysis complete. Review the raw response below.
+          {hasParsedCandidates
+            ? `Parsed ${candidates.length} Pokemon candidate${candidates.length === 1 ? '' : 's'}.`
+            : 'Analysis complete.'}
         </p>
       )}
 
@@ -53,6 +58,7 @@ function AnalysisSection({
         {isLoading ? 'Analyzing...' : 'Analyze Sketch'}
       </button>
 
+      <CandidatesDebugPanel candidates={candidates} />
       <AnalysisDebugPanel rawResponse={rawResponse} />
     </section>
   );

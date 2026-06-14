@@ -21,6 +21,7 @@ export function usePokAImonWorkflow() {
     error,
     status,
     rawResponse,
+    candidates,
   } = useSketchAnalysis();
 
   const handleClearCanvas = useCallback(() => {
@@ -51,6 +52,7 @@ export function usePokAImonWorkflow() {
       error,
       status,
       rawResponse,
+      candidates,
     },
   };
 }

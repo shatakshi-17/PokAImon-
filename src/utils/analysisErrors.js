@@ -34,5 +34,13 @@ export function toUserFriendlyAnalysisError(error) {
     return 'Gemini returned an empty response. Try analyzing again.';
   }
 
+  if (message.includes('Could not parse Gemini response as JSON')) {
+    return 'Gemini returned a response that could not be parsed. Try analyzing again.';
+  }
+
+  if (message.includes('did not include any candidates')) {
+    return 'Gemini did not return any Pokemon candidates. Try analyzing again.';
+  }
+
   return message;
 }
