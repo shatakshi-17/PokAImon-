@@ -6,6 +6,14 @@ export function toUserFriendlyAnalysisError(error) {
     return 'Gemini API key is not configured. Add VITE_GEMINI_API_KEY to your .env file.';
   }
 
+  if (message === 'GEMINI_INVALID_API_KEY') {
+    return 'Your Gemini API key is invalid or expired. Create a new key in Google AI Studio, update .env, and restart the dev server.';
+  }
+
+  if (message === 'GEMINI_MODEL_QUOTA_UNAVAILABLE') {
+    return 'This Gemini model has no free-tier quota on your API key. Set VITE_GEMINI_MODEL=gemini-2.5-flash in .env and restart the dev server.';
+  }
+
   if (message.includes('Export a sketch')) {
     return message;
   }
@@ -18,8 +26,12 @@ export function toUserFriendlyAnalysisError(error) {
     return 'Gemini rejected the request. Check that your API key is valid.';
   }
 
-  if (message.includes('(429)')) {
-    return 'Too many requests. Wait a moment and try again.';
+  if (
+    message === 'GEMINI_RATE_LIMIT' ||
+    message.includes('(429)') ||
+    message.includes('RESOURCE_EXHAUSTED')
+  ) {
+    return 'Gemini rate limit reached. Wait a minute, then try analyzing again.';
   }
 
   if (

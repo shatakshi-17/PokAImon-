@@ -16,6 +16,14 @@ function AnalysisSection({
   const showIdleMessage = status === ANALYSIS_STATUS.IDLE && !error;
   const hasParsedCandidates = candidates.length > 0;
 
+  const handleAnalyzeClick = () => {
+    if (!canAnalyze || isLoading) {
+      return;
+    }
+
+    onAnalyze();
+  };
+
   return (
     <section
       aria-label="Sketch analysis"
@@ -52,7 +60,7 @@ function AnalysisSection({
       <button
         type="button"
         className="mt-4"
-        onClick={onAnalyze}
+        onClick={handleAnalyzeClick}
         disabled={!canAnalyze || isLoading}
         aria-busy={isLoading}
       >

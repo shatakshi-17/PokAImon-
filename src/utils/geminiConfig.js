@@ -1,6 +1,6 @@
 export const GEMINI_CONFIG = {
   apiBaseUrl: 'https://generativelanguage.googleapis.com/v1beta',
-  model: import.meta.env.VITE_GEMINI_MODEL ?? 'gemini-2.0-flash',
+  model: import.meta.env.VITE_GEMINI_MODEL ?? 'gemini-2.5-flash',
 };
 
 export function getGeminiApiKey() {
