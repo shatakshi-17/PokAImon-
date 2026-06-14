@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { ANALYSIS_STATUS } from '../../utils/analysisConstants';
 import AnalysisDebugPanel from '../AnalysisDebugPanel';
-import CandidatesDebugPanel from '../CandidatesDebugPanel';
+import PokemonResultsSection from '../PokemonResultsSection';
 
 function AnalysisSection({
   onAnalyze,
@@ -11,6 +12,7 @@ function AnalysisSection({
   rawResponse = null,
   candidates = [],
 }) {
+  const [showDebug, setShowDebug] = useState(false);
   const showIdleMessage = status === ANALYSIS_STATUS.IDLE && !error;
   const hasParsedCandidates = candidates.length > 0;
 
@@ -23,8 +25,8 @@ function AnalysisSection({
 
       {showIdleMessage && (
         <p className="text-sm text-slate-400">
-          Export a sketch, then analyze it with Gemini to generate creature
-          ideas.
+          Export a sketch, then analyze it with Gemini to generate Pokemon
+          flashcards.
         </p>
       )}
 
@@ -40,11 +42,10 @@ function AnalysisSection({
         </p>
       )}
 
-      {status === ANALYSIS_STATUS.SUCCESS && !error && (
+      {status === ANALYSIS_STATUS.SUCCESS && !error && hasParsedCandidates && (
         <p className="text-sm text-green-400" role="status">
-          {hasParsedCandidates
-            ? `Parsed ${candidates.length} Pokemon candidate${candidates.length === 1 ? '' : 's'}.`
-            : 'Analysis complete.'}
+          Found {candidates.length} Pokemon candidate
+          {candidates.length === 1 ? '' : 's'} from your sketch.
         </p>
       )}
 
@@ -58,8 +59,20 @@ function AnalysisSection({
         {isLoading ? 'Analyzing...' : 'Analyze Sketch'}
       </button>
 
-      <CandidatesDebugPanel candidates={candidates} />
-      <AnalysisDebugPanel rawResponse={rawResponse} />
+      <PokemonResultsSection candidates={candidates} />
+
+      {rawResponse && (
+        <div className="mt-6 text-left">
+          <button
+            type="button"
+            className="text-xs text-slate-500 underline"
+            onClick={() => setShowDebug((visible) => !visible)}
+          >
+            {showDebug ? 'Hide developer debug' : 'Show developer debug'}
+          </button>
+          {showDebug && <AnalysisDebugPanel rawResponse={rawResponse} />}
+        </div>
+      )}
     </section>
   );
 }
