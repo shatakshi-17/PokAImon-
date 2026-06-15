@@ -32,12 +32,7 @@ function extractResponseText(payload) {
 }
 
 export async function analyzeSketch(imageDataUrl) {
-  console.log('[geminiService] analyzeSketch called');
-
   if (inFlightAnalysisRequest) {
-    console.warn(
-      '[geminiService] Duplicate Gemini request blocked; reusing in-flight request',
-    );
     return inFlightAnalysisRequest;
   }
 
@@ -49,28 +44,16 @@ export async function analyzeSketch(imageDataUrl) {
     const apiKey = getGeminiApiKey();
     const { mimeType, base64Data } = parseDataUrl(imageDataUrl);
 
-    console.log('[geminiService] Calling Gemini API', {
-      model: GEMINI_CONFIG.model,
-    });
-
     const response = await fetch(buildGenerateContentUrl(apiKey), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(
         buildSketchAnalysisPayload({ mimeType, base64Data }),
       ),
     });
 
-    console.log('[geminiService] Gemini response received', {
-      status: response.status,
-      ok: response.ok,
-    });
-
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error('[geminiService] Gemini error response body', errorBody);
       throw createGeminiApiError(response.status, errorBody);
     }
 
@@ -81,7 +64,6 @@ export async function analyzeSketch(imageDataUrl) {
       throw new Error('Gemini API returned an empty response.');
     }
 
-    console.log('[geminiService] Gemini analysis completed successfully');
     return responseText;
   })();
 
@@ -89,12 +71,7 @@ export async function analyzeSketch(imageDataUrl) {
 
   try {
     return await requestPromise;
-  } catch (error) {
-    console.error('[geminiService] Gemini analysis failed', error);
-    throw error;
   } finally {
     inFlightAnalysisRequest = null;
   }
 }
-
-export { SKETCH_ANALYSIS_PROMPT } from './geminiPrompt';

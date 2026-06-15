@@ -1,6 +1,7 @@
 import {
   MAX_POKEMON_CANDIDATES,
   POKEMON_CANDIDATE_DEFAULTS,
+  REQUIRED_ABILITY_COUNT,
 } from './pokemonCandidateDefaults';
 
 function extractJsonString(rawResponse) {
@@ -21,68 +22,48 @@ function extractJsonString(rawResponse) {
   return trimmed;
 }
 
-function normalizeConfidence(value) {
-  const numericValue = Number(value);
-
-  if (Number.isNaN(numericValue)) {
-    return POKEMON_CANDIDATE_DEFAULTS.confidence;
-  }
-
-  return Math.min(1, Math.max(0, numericValue));
-}
-
-function normalizeAbilities(value) {
-  if (!Array.isArray(value)) {
-    return [...POKEMON_CANDIDATE_DEFAULTS.abilities];
-  }
-
-  return value
-    .map((ability) => String(ability ?? '').trim())
-    .filter(Boolean);
-}
-
 function normalizeString(value, fallback) {
   const normalized = String(value ?? fallback).trim();
   return normalized || fallback;
 }
 
+function normalizeAbilities(value) {
+  const fallbackAbilities = [...POKEMON_CANDIDATE_DEFAULTS.abilities];
+  const source = Array.isArray(value) ? value : [];
+
+  const normalized = source
+    .map((ability) => String(ability ?? '').trim())
+    .filter(Boolean);
+
+  while (normalized.length < REQUIRED_ABILITY_COUNT) {
+    normalized.push(fallbackAbilities[normalized.length]);
+  }
+
+  return normalized.slice(0, REQUIRED_ABILITY_COUNT);
+}
+
 export function normalizePokemonCandidate(rawCandidate, index) {
   return {
-    name: normalizeString(
-      rawCandidate?.name,
-      `Candidate ${index + 1}`,
-    ),
-    type: normalizeString(
-      rawCandidate?.type,
-      POKEMON_CANDIDATE_DEFAULTS.type,
+    name: normalizeString(rawCandidate?.name, `Candidate ${index + 1}`),
+    type: normalizeString(rawCandidate?.type, POKEMON_CANDIDATE_DEFAULTS.type),
+    species: normalizeString(
+      rawCandidate?.species,
+      POKEMON_CANDIDATE_DEFAULTS.species,
     ),
     description: normalizeString(
       rawCandidate?.description,
       POKEMON_CANDIDATE_DEFAULTS.description,
     ),
-    abilities: normalizeAbilities(rawCandidate?.abilities),
-    weakness: normalizeString(
-      rawCandidate?.weakness,
-      POKEMON_CANDIDATE_DEFAULTS.weakness,
+    signatureMove: normalizeString(
+      rawCandidate?.signatureMove ?? rawCandidate?.signature_move,
+      POKEMON_CANDIDATE_DEFAULTS.signatureMove,
     ),
-    confidence: normalizeConfidence(rawCandidate?.confidence),
+    abilities: normalizeAbilities(rawCandidate?.abilities),
+    habitat: normalizeString(
+      rawCandidate?.habitat,
+      POKEMON_CANDIDATE_DEFAULTS.habitat,
+    ),
   };
-}
-
-function getCandidatesArray(parsedPayload) {
-  if (Array.isArray(parsedPayload?.candidates)) {
-    return parsedPayload.candidates;
-  }
-
-  if (Array.isArray(parsedPayload?.creatures)) {
-    return parsedPayload.creatures;
-  }
-
-  if (Array.isArray(parsedPayload)) {
-    return parsedPayload;
-  }
-
-  return null;
 }
 
 export function parseGeminiCandidates(rawResponse) {
@@ -98,7 +79,9 @@ export function parseGeminiCandidates(rawResponse) {
     throw new Error('Could not parse Gemini response as JSON.');
   }
 
-  const candidatesArray = getCandidatesArray(parsedPayload);
+  const candidatesArray = Array.isArray(parsedPayload?.candidates)
+    ? parsedPayload.candidates
+    : null;
 
   if (!candidatesArray?.length) {
     throw new Error('Gemini response did not include any candidates.');

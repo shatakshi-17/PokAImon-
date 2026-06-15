@@ -14,15 +14,8 @@ export function usePokAImonWorkflow() {
     exportSketch,
     exportedSketch,
   } = useSketchWorkspace();
-  const {
-    analyzeSketch,
-    resetAnalysis,
-    isLoading,
-    error,
-    status,
-    rawResponse,
-    candidates,
-  } = useSketchAnalysis();
+  const { analyzeSketch, resetAnalysis, isLoading, error, status, candidates } =
+    useSketchAnalysis();
 
   const handleClearCanvas = useCallback(() => {
     clearCanvas();
@@ -30,12 +23,7 @@ export function usePokAImonWorkflow() {
   }, [clearCanvas, resetAnalysis]);
 
   const handleAnalyzeSketch = useCallback(() => {
-    console.log('[usePokAImonWorkflow] Analyze Sketch button clicked');
-
     if (!exportedSketch) {
-      console.warn(
-        '[usePokAImonWorkflow] Analysis skipped because no sketch is exported',
-      );
       return;
     }
 
@@ -60,7 +48,6 @@ export function usePokAImonWorkflow() {
       isLoading,
       error,
       status,
-      rawResponse,
       candidates,
     },
   };

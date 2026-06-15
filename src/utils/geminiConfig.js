@@ -14,7 +14,3 @@ export function getGeminiApiKey() {
 
   return apiKey;
 }
-
-export function isGeminiConfigured() {
-  return Boolean(import.meta.env.VITE_GEMINI_API_KEY);
-}

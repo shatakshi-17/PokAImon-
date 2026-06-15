@@ -7,82 +7,45 @@ import { parseGeminiCandidates } from '../utils/parseGeminiResponse';
 export function useSketchAnalysis() {
   const [status, setStatus] = useState(ANALYSIS_STATUS.IDLE);
   const [error, setError] = useState(null);
-  const [rawResponse, setRawResponse] = useState(null);
   const [candidates, setCandidates] = useState([]);
-  const isRequestActiveRef = useRef(false);
   const inFlightRequestRef = useRef(null);
 
   const resetAnalysis = useCallback(() => {
     setStatus(ANALYSIS_STATUS.IDLE);
     setError(null);
-    setRawResponse(null);
     setCandidates([]);
   }, []);
 
   const analyzeSketch = useCallback(async (imageData) => {
     if (inFlightRequestRef.current) {
-      console.warn(
-        '[useSketchAnalysis] Analysis already in progress; ignoring duplicate trigger',
-      );
       return inFlightRequestRef.current;
-    }
-
-    if (isRequestActiveRef.current) {
-      console.warn(
-        '[useSketchAnalysis] Request lock active; ignoring duplicate trigger',
-      );
-      return null;
     }
 
     if (!imageData) {
       setStatus(ANALYSIS_STATUS.ERROR);
       setError('Export a sketch before starting analysis.');
-      setRawResponse(null);
       setCandidates([]);
       return null;
     }
 
-    console.log('[useSketchAnalysis] Analysis started');
-
-    isRequestActiveRef.current = true;
-    setStatus(ANALYSIS_STATUS.LOADING);
-    setError(null);
-    setRawResponse(null);
-    setCandidates([]);
-
     const requestPromise = (async () => {
+      setStatus(ANALYSIS_STATUS.LOADING);
+      setError(null);
+      setCandidates([]);
+
       try {
         const responseText = await analyzeSketchRequest(imageData);
-        console.log('[useSketchAnalysis] Gemini returned; parsing candidates');
-
-        setRawResponse(responseText);
-
-        try {
-          const parsedCandidates = parseGeminiCandidates(responseText);
-          setCandidates(parsedCandidates);
-          setStatus(ANALYSIS_STATUS.SUCCESS);
-          console.log('[useSketchAnalysis] Analysis completed', {
-            candidateCount: parsedCandidates.length,
-          });
-          return parsedCandidates;
-        } catch (parseError) {
-          setCandidates([]);
-          setError(toUserFriendlyAnalysisError(parseError));
-          setStatus(ANALYSIS_STATUS.ERROR);
-          console.error('[useSketchAnalysis] Failed to parse Gemini response', parseError);
-          return null;
-        }
+        const parsedCandidates = parseGeminiCandidates(responseText);
+        setCandidates(parsedCandidates);
+        setStatus(ANALYSIS_STATUS.SUCCESS);
+        return parsedCandidates;
       } catch (analysisError) {
         setError(toUserFriendlyAnalysisError(analysisError));
         setStatus(ANALYSIS_STATUS.ERROR);
-        setRawResponse(null);
         setCandidates([]);
-        console.error('[useSketchAnalysis] Analysis failed', analysisError);
         return null;
       } finally {
-        isRequestActiveRef.current = false;
         inFlightRequestRef.current = null;
-        console.log('[useSketchAnalysis] Analysis request finished');
       }
     })();
 
@@ -93,7 +56,6 @@ export function useSketchAnalysis() {
   return {
     status,
     error,
-    rawResponse,
     candidates,
     analyzeSketch,
     resetAnalysis,

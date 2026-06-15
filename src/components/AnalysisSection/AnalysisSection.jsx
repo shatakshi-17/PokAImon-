@@ -1,7 +1,8 @@
-import { useState } from 'react';
 import { ANALYSIS_STATUS } from '../../utils/analysisConstants';
-import AnalysisDebugPanel from '../AnalysisDebugPanel';
-import PokemonResultsSection from '../PokemonResultsSection';
+import PokemonResultsSection from '../PokemonResultsSection/PokemonResultsSection';
+
+const analyzeButtonClassName =
+  'mt-4 rounded-lg border border-yellow-400/30 bg-yellow-400/10 px-5 py-2.5 text-sm font-semibold text-yellow-300 transition hover:bg-yellow-400/20 disabled:cursor-not-allowed disabled:opacity-50';
 
 function AnalysisSection({
   onAnalyze,
@@ -9,25 +10,15 @@ function AnalysisSection({
   isLoading = false,
   error = null,
   status = ANALYSIS_STATUS.IDLE,
-  rawResponse = null,
   candidates = [],
 }) {
-  const [showDebug, setShowDebug] = useState(false);
   const showIdleMessage = status === ANALYSIS_STATUS.IDLE && !error;
   const hasParsedCandidates = candidates.length > 0;
-
-  const handleAnalyzeClick = () => {
-    if (!canAnalyze || isLoading) {
-      return;
-    }
-
-    onAnalyze();
-  };
 
   return (
     <section
       aria-label="Sketch analysis"
-      className="rounded-lg border border-dashed border-slate-700 bg-slate-900 p-6 text-center"
+      className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 text-center shadow-lg shadow-black/20"
     >
       <h2 className="mb-2 text-lg font-semibold text-white">Sketch Analysis</h2>
 
@@ -59,8 +50,8 @@ function AnalysisSection({
 
       <button
         type="button"
-        className="mt-4"
-        onClick={handleAnalyzeClick}
+        className={analyzeButtonClassName}
+        onClick={onAnalyze}
         disabled={!canAnalyze || isLoading}
         aria-busy={isLoading}
       >
@@ -68,19 +59,6 @@ function AnalysisSection({
       </button>
 
       <PokemonResultsSection candidates={candidates} />
-
-      {rawResponse && (
-        <div className="mt-6 text-left">
-          <button
-            type="button"
-            className="text-xs text-slate-500 underline"
-            onClick={() => setShowDebug((visible) => !visible)}
-          >
-            {showDebug ? 'Hide developer debug' : 'Show developer debug'}
-          </button>
-          {showDebug && <AnalysisDebugPanel rawResponse={rawResponse} />}
-        </div>
-      )}
     </section>
   );
 }

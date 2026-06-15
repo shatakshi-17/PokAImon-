@@ -1,4 +1,4 @@
-import PokemonCard from '../PokemonCard';
+import PokemonCard from '../PokemonCard/PokemonCard';
 
 function PokemonResultsSection({ candidates = [] }) {
   if (!candidates.length) {
@@ -14,9 +14,9 @@ function PokemonResultsSection({ candidates = [] }) {
       <h3 className="mb-4 text-lg font-semibold text-white">
         Your Pokemon Candidates
       </h3>
-      <ul className="grid list-none gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <ul className="grid list-none gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {candidates.map((candidate, index) => (
-          <li key={`${candidate.name}-${index}`}>
+          <li key={`${candidate.name}-${index}`} className="h-full">
             <PokemonCard candidate={candidate} />
           </li>
         ))}
