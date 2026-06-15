@@ -11,7 +11,7 @@ Draw a creature, export your sketch, and let AI turn it into Pokemon-style flash
 **Live demo:** [https://6a2ff0d99c5e7c4f2271dd05--ubiquitous-cascaron-fee516.netlify.app/](https://6a2ff0d99c5e7c4f2271dd05--ubiquitous-cascaron-fee516.netlify.app/)
 ## What it does
 
-PokAImon is a browser-based sketching app that uses Google's Gemini vision model to analyze your drawing and generate Pokemon-inspired flashcards. Each card includes a name, type, species, description, signature move, abilities, and habitat.
+PokAImon is a browser-based  React sketching app that uses Google's Gemini vision model to analyze your drawing and generate Pokemon-inspired flashcards. Each card includes a name, type, species, description, signature move, abilities, and habitat.
 
 Works on desktop and mobile — draw with a mouse or your finger on a touch screen.
 
