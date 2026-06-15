@@ -10,7 +10,7 @@ function DrawingCanvas({
       ref={canvasRef}
       width={width}
       height={height}
-      className={className}
+      className={`touch-none select-none ${className}`}
       aria-label="Drawing canvas"
       {...handlers}
     />

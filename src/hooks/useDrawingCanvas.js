@@ -43,9 +43,14 @@ export function useDrawingCanvas(options = {}) {
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
+    const touch =
+      event.touches?.[0] ?? event.changedTouches?.[0] ?? null;
+    const clientX = touch ? touch.clientX : event.clientX;
+    const clientY = touch ? touch.clientY : event.clientY;
+
     return {
-      x: (event.clientX - rect.left) * scaleX,
-      y: (event.clientY - rect.top) * scaleY,
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
     };
   }, []);
 
@@ -159,6 +164,38 @@ export function useDrawingCanvas(options = {}) {
     didStrokeRef.current = false;
   }, [captureSnapshot, pushSnapshot]);
 
+  const handleTouchStart = useCallback(
+    (event) => {
+      if (event.touches.length !== 1) {
+        return;
+      }
+
+      event.preventDefault();
+      startDrawing(event);
+    },
+    [startDrawing],
+  );
+
+  const handleTouchMove = useCallback(
+    (event) => {
+      if (!isDrawingRef.current || event.touches.length !== 1) {
+        return;
+      }
+
+      event.preventDefault();
+      draw(event);
+    },
+    [draw],
+  );
+
+  const handleTouchEnd = useCallback(
+    (event) => {
+      event.preventDefault();
+      stopDrawing();
+    },
+    [stopDrawing],
+  );
+
   const clearCanvas = useCallback(() => {
     resetHistory();
   }, [resetHistory]);
@@ -180,6 +217,10 @@ export function useDrawingCanvas(options = {}) {
       onMouseMove: draw,
       onMouseUp: stopDrawing,
       onMouseLeave: stopDrawing,
+      onTouchStart: handleTouchStart,
+      onTouchMove: handleTouchMove,
+      onTouchEnd: handleTouchEnd,
+      onTouchCancel: handleTouchEnd,
     },
     width,
     height,
